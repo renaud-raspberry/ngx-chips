@@ -12,12 +12,12 @@ import {
 } from '@angular/core';
 
 // rx
-import { Observable } from 'rxjs';
-import { filter, first, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import {Observable} from 'rxjs';
+import {filter, first, debounceTime, distinctUntilChanged} from 'rxjs/operators';
 
-import { Ng2Dropdown, Ng2MenuItem } from 'ng2-material-dropdown';
-import { defaults } from '../../defaults';
-import { TagInputComponent } from '../tag-input/tag-input';
+import {Ng2Dropdown, Ng2MenuItem} from 'ng2-material-dropdown';
+import {defaults} from '../../defaults';
+import {TagInputComponent} from '../tag-input/tag-input';
 import {TagModel} from '../../core/tag-model';
 
 @Component({
@@ -56,7 +56,7 @@ export class TagInputDropdown implements AfterViewInit {
    * @description observable passed as input which populates the autocomplete items
    * @name autocompleteObservable
    */
-  @Input() public autocompleteObservable: (text: string) => Observable<any>;
+  @Input() public autocompleteObservable: (text: string, extra: any) => Observable<any>;
 
   /**
    * - desc minimum text length in order to display the autocomplete dropdown
@@ -79,6 +79,11 @@ export class TagInputDropdown implements AfterViewInit {
    * @name identifyBy
    */
   @Input() public identifyBy = defaults.dropdown.identifyBy;
+
+  /**
+   * @name extra
+   */
+  @Input() public extra = defaults.dropdown.extra;
 
   /**
    * @description a function a developer can use to implement custom matching for the autocomplete
@@ -136,7 +141,8 @@ export class TagInputDropdown implements AfterViewInit {
    * @name autocompleteItems
    * @desc array of items that will populate the autocomplete
    */
-  @Input() public get autocompleteItems(): TagModel[] {
+  @Input()
+  public get autocompleteItems(): TagModel[] {
     const items = this._autocompleteItems;
 
     if (!items) {
@@ -146,14 +152,15 @@ export class TagInputDropdown implements AfterViewInit {
     return items.map((item: TagModel) => {
       return typeof item === 'string'
         ? {
-            [this.displayBy]: item,
-            [this.identifyBy]: item
-          }
+          [this.displayBy]: item,
+          [this.identifyBy]: item
+        }
         : item;
     });
   }
 
-  constructor(private readonly injector: Injector) {}
+  constructor(private readonly injector: Injector) {
+  }
 
   /**
    * @name ngAfterviewInit
@@ -319,7 +326,8 @@ export class TagInputDropdown implements AfterViewInit {
    */
   private requestAdding = async (item: Ng2MenuItem) => {
     const tag = this.createTagModel(item);
-    await this.tagInput.onAddingRequested(true, tag).catch(() => {});
+    await this.tagInput.onAddingRequested(true, tag).catch(() => {
+    });
   };
 
   /**
@@ -354,12 +362,12 @@ export class TagInputDropdown implements AfterViewInit {
       const hasValue = dupesAllowed
         ? false
         : this.tagInput.tags.some(tag => {
-            const identifyBy = this.tagInput.identifyBy;
-            const model =
-              typeof tag.model === 'string' ? tag.model : tag.model[identifyBy];
+          const identifyBy = this.tagInput.identifyBy;
+          const model =
+            typeof tag.model === 'string' ? tag.model : tag.model[identifyBy];
 
-            return model === item[this.identifyBy];
-          });
+          return model === item[this.identifyBy];
+        });
 
       return this.matchingFn(value, item) && hasValue === false;
     });
@@ -387,9 +395,9 @@ export class TagInputDropdown implements AfterViewInit {
     this.autocompleteItems = data.map(item => {
       return typeof item === 'string'
         ? {
-            [this.displayBy]: item,
-            [this.identifyBy]: item
-          }
+          [this.displayBy]: item,
+          [this.identifyBy]: item
+        }
         : item;
     });
 
@@ -418,7 +426,7 @@ export class TagInputDropdown implements AfterViewInit {
       }
     };
 
-    this.autocompleteObservable(text)
+    this.autocompleteObservable(text, this.extra)
       .pipe(first())
       .subscribe(subscribeFn, () => this.setLoadingState(false));
   };

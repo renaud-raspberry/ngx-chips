@@ -54,6 +54,7 @@ export interface TagInputDropdownOptions {
     minimumTextLength: number;
     limitItemsTo: number;
     keepOpen: boolean;
+    extra: any;
     zIndex: number;
     dynamicUpdate: boolean;
     matchingFn: (value: string, target: TagModel) => boolean;
@@ -109,6 +110,7 @@ export const defaults = {
         limitItemsTo: Infinity,
         keepOpen: true,
         dynamicUpdate: true,
+        extra: {},
         zIndex: 1000,
         matchingFn
     }
